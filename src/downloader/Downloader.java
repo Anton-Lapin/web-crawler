@@ -1,7 +1,7 @@
 /**
  *
  * @author Anton Lapin
- * @version date 13 February 2018
+ * @version date 15 February 2018
  */
 package downloader;
 
