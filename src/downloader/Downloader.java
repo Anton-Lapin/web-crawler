@@ -17,10 +17,6 @@ public class Downloader {
     private BufferedReader reader = null;
     private URL site = null;
 
-    public static void main(String[] args) {
-        System.out.println(new Downloader().exec("file:///D:/HTML/MyTestCite.html"));
-    }
-
     public String exec(String url) {
         try {
             site = new URL(url);
