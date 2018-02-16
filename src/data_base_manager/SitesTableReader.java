@@ -1,7 +1,7 @@
 /**
  *
  * @author Anton Lapin
- * @version date 13 February 2018
+ * @version date 16 February 2018
  */
 package data_base_manager;
 
@@ -42,11 +42,8 @@ public class SitesTableReader {
         ResultSet rs = this.stmt.executeQuery("SELECT * FROM Sites\n" +
                 "   LEFT JOIN Pages ON Pages.SiteID = Sites.ID\n" +
                 "   WHERE Pages.Url IS NULL;");
-        if(rs.next()) {
-            System.out.println(rs.getInt(1) + " " + rs.getString(2));
+        while(rs.next()) {
             newSitesList.put(rs.getInt(1), rs.getString(2));
-        } else {
-            System.out.println("nothing");
         }
     }
 
