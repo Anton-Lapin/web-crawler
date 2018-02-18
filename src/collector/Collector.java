@@ -19,6 +19,7 @@ public class Collector {
     private PagesTableReader pagesTableReader;
     private PagesTableWriter pagesTableWriter;
     private RobotsTxtParser robotsTxtParser;
+    private TreeMap<String, Integer> newPagesList = new TreeMap<>();
 
     public void run() {
         System.out.println("Collector beginning...");
@@ -28,6 +29,8 @@ public class Collector {
             uncheckedReferencesList = getUncheckedReferencesListFromDB();
             sortUncheckedListForParsing(uncheckedReferencesList);
             startRobotsTxtParser();
+
+            insertNewPagesListIntoDB();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -72,5 +75,16 @@ public class Collector {
         robotsTxtParser.setUncheckedRobotsTxtReferencesList(robotsTxtReferenceList);
         robotsTxtParser.start();
         robotsTxtParser.join();
+        newPagesList = robotsTxtParser.getNewPagesList();
     }
+
+    private void insertNewPagesListIntoDB() {
+        pagesTableWriter = new PagesTableWriter();
+        try {
+            pagesTableWriter.insertNewPagesList(newPagesList);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

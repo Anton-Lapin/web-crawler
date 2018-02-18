@@ -12,9 +12,6 @@ public class MyTestClass {
         TreeMap<String, Integer> list;
         list = collector.getRobotsTxtReferenceList();
         Set<Map.Entry<String, Integer>> set = list.entrySet();
-        for (Map.Entry<String, Integer> o : set) {
-            System.out.println(o.getKey() + " " + o.getValue());
-        }
         System.out.println("Test end");
     }
 }

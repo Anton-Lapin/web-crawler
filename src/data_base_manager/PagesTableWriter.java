@@ -71,4 +71,27 @@ public class PagesTableWriter extends Thread {
         }
         connection.setAutoCommit(true);
     }
+
+    public void insertNewPagesList(TreeMap<String, Integer> list) throws Exception {
+        connect();
+        int id = 1;
+        ResultSet rs = this.stmt.executeQuery("SELECT MAX(ID) FROM Pages");
+        id += rs.getInt(1);
+        String url;
+        int siteId;
+        String foundDateTime = null;
+        String lastScanDate = null;
+        connection.setAutoCommit(false);
+        Set<Map.Entry<String, Integer>> set = list.entrySet();
+        for (Map.Entry<String, Integer> o : set) {
+            url = o.getKey();
+            siteId = o.getValue();
+            //?
+            stmt.executeUpdate("INSERT INTO Pages (ID, Url, SiteID, FoundDateTime, LastScanDate) VALUES ('"
+                    + id + "','" + url + "','" + siteId + "','" + foundDateTime + "','" + lastScanDate + "')");
+            id++;
+        }
+        connection.setAutoCommit(true);
+        disconnect();
+    }
 }
