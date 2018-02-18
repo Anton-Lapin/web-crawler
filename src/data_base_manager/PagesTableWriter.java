@@ -1,7 +1,7 @@
 /**
  *
  * @author Anton Lapin
- * @version date 16 February 2018
+ * @version date 18 February 2018
  */
 package data_base_manager;
 
@@ -10,21 +10,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class PagesTableWriter {
+public class PagesTableWriter extends Thread {
     private Connection connection;
     private Statement stmt;
     private SitesTableReader sitesTableReader;
     private TreeMap<Integer, String> newSitesList;
 
     public void run(){
+        System.out.println("PagesTableWriter beginning...");
         try{
             connect();
-            addStandardRobotsTxtRef();
+            addStandardRobotsTxtReference();
         }catch (Exception e){
             e.printStackTrace();
         }finally {
             disconnect();
         }
+        System.out.println("PagesTableWriter end");
     }
 
     private void connect() throws Exception{
@@ -41,9 +43,14 @@ public class PagesTableWriter {
         }
     }
 
-    private void addStandardRobotsTxtRef() throws SQLException{
+    private void addStandardRobotsTxtReference() throws SQLException{
         sitesTableReader = new SitesTableReader();
-        sitesTableReader.run();
+        sitesTableReader.start();
+        try {
+            sitesTableReader.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         newSitesList = sitesTableReader.getNewSitesList();
         int id = 1;
         ResultSet rs = this.stmt.executeQuery("SELECT MAX(ID) FROM Pages");
