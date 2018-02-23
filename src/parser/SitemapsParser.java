@@ -38,7 +38,7 @@ public class SitemapsParser extends Thread {
         for (Map.Entry<String, Integer> o : set) {
             String url = o.getKey();
             pageContent = downloader.exec(url);
-            //pageContentHandle(pageContent, o.getValue());
+            pageContentHandle(pageContent, o.getValue());
             System.out.println(pageContent);
             System.out.println("-----------------------------");
         }
@@ -47,7 +47,7 @@ public class SitemapsParser extends Thread {
     private void pageContentHandle(String pageContent, Integer siteId){
         String[] split = pageContent.split(" ");
         for (int i = 0; i < split.length; i++) {
-            if(split[i].contains("sitemap") && split[i].contains("http")) {
+            if(split[i].endsWith(".html") && split[i].contains("http")) {
                 newPagesList.put(split[i], siteId);
             }
         }

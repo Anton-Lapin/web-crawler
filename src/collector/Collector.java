@@ -1,12 +1,15 @@
 /**
  *
  * @author Anton Lapin
- * @version date 18 February 2018
+ * @version date Feb 23 2018
  */
 package collector;
 
 import data_base_manager.PagesTableReader;
 import data_base_manager.PagesTableWriter;
+import file_manager.GzipFileManager;
+import file_manager.XmlFileManager;
+import parser.HtmlsParser;
 import parser.RobotsTxtParser;
 import parser.SitemapsParser;
 
@@ -18,10 +21,16 @@ public class Collector {
     private TreeMap<Integer, String> uncheckedReferencesList;
     private TreeMap<String, Integer> robotsTxtReferenceList = new TreeMap<>();
     private TreeMap<String, Integer> sitemapReferenceList = new TreeMap<>();
+    private TreeMap<String, Integer> htmlsReferenceList = new TreeMap<>();
+    private TreeMap<String, Integer> xmlFilesList = new TreeMap<>();
+    private TreeMap<String, Integer> gzArchivesList = new TreeMap<>();
     private PagesTableReader pagesTableReader;
     private PagesTableWriter pagesTableWriter;
     private RobotsTxtParser robotsTxtParser;
     private SitemapsParser sitemapsParser;
+    private GzipFileManager gzipFileManager;
+    private XmlFileManager xmlFileManager;
+    private HtmlsParser htmlsParser;
     private TreeMap<String, Integer> newPagesList = new TreeMap<>();
 
     public void run() {
@@ -36,7 +45,11 @@ public class Collector {
 
             startRobotsTxtParser();
             startSitemapsParser();
+            startGzipFileManager();
+            startXmlFileManager();
+            //startHtmlsParser();
 
+            clearAllLists();
             insertNewPagesListIntoDB();
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,8 +82,14 @@ public class Collector {
             Integer id = Integer.parseInt(splittedValue[1]);
             if(splittedValue[0].contains("robots.txt")) {
                 robotsTxtReferenceList.put(splittedValue[0], id);
+            } else if(splittedValue[0].endsWith(".gz")) {
+                gzArchivesList.put(splittedValue[0], id);
+            } else if(splittedValue[0].endsWith(".xml")) {
+                xmlFilesList.put(splittedValue[0], id);
             } else if(splittedValue[0].contains("sitemap")) {
                 sitemapReferenceList.put(splittedValue[0], id);
+            } else if(splittedValue[0].endsWith(".html")) {
+                htmlsReferenceList.put(splittedValue[0], id);
             }
         }
     }
@@ -91,6 +110,22 @@ public class Collector {
         newPagesList.putAll(sitemapsParser.getNewPagesList());
     }
 
+    private void startGzipFileManager() throws InterruptedException {
+        gzipFileManager = new GzipFileManager();
+        gzipFileManager.setGzipArchivesList(gzArchivesList);
+        gzipFileManager.start();
+        gzipFileManager.join();
+        newPagesList.putAll(gzipFileManager.getNewPagesList());
+    }
+
+    private void startXmlFileManager() throws InterruptedException {
+        xmlFileManager = new XmlFileManager();
+        xmlFileManager.setXmlFilesList(xmlFilesList);
+        xmlFileManager.start();
+        xmlFileManager.join();
+        newPagesList.putAll(xmlFileManager.getNewPagesList());
+    }
+
     private void insertNewPagesListIntoDB() {
         pagesTableWriter = new PagesTableWriter();
         try {
@@ -99,6 +134,14 @@ public class Collector {
             e.printStackTrace();
         }
         newPagesList.clear();
+    }
+
+    private void clearAllLists() {
+        robotsTxtReferenceList.clear();
+        gzArchivesList.clear();
+        xmlFilesList.clear();
+        sitemapReferenceList.clear();
+        htmlsReferenceList.clear();
     }
 
 }
