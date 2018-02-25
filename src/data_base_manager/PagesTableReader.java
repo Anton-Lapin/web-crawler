@@ -48,6 +48,19 @@ public class PagesTableReader extends Thread {
             System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3));
             uncheckedReferencesList.put(rs.getInt(1), rs.getString(2) + " " + rs.getInt(3));
         }
+        //drop table (unnesessary)
+        stmt.executeUpdate("DELETE FROM Pages");
+    }
+
+    public void clearTable() {
+        try {
+            connect();
+            stmt.executeUpdate("DELETE FROM Pages");
+        } catch (Exception e) {
+
+        } finally {
+            disconnect();
+        }
     }
 
     public TreeMap<Integer, String> getUncheckedReferencesList() {

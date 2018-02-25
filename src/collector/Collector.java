@@ -5,8 +5,10 @@
  */
 package collector;
 
+import data_base_manager.KeywordsTableReader;
 import data_base_manager.PagesTableReader;
 import data_base_manager.PagesTableWriter;
+import data_base_manager.PersonPageRankWriter;
 import file_manager.GzipFileManager;
 import file_manager.XmlFileManager;
 import parser.HtmlsParser;
@@ -24,14 +26,18 @@ public class Collector {
     private TreeMap<String, Integer> htmlsReferenceList = new TreeMap<>();
     private TreeMap<String, Integer> xmlFilesList = new TreeMap<>();
     private TreeMap<String, Integer> gzArchivesList = new TreeMap<>();
+    private TreeMap<String, Integer> keywordsList;
     private PagesTableReader pagesTableReader;
     private PagesTableWriter pagesTableWriter;
     private RobotsTxtParser robotsTxtParser;
     private SitemapsParser sitemapsParser;
     private GzipFileManager gzipFileManager;
     private XmlFileManager xmlFileManager;
+    private KeywordsTableReader keywordsTableReader;
     private HtmlsParser htmlsParser;
+    private PersonPageRankWriter personPageRankWriter;
     private TreeMap<String, Integer> newPagesList = new TreeMap<>();
+    private TreeMap<String, Integer> personPageRankList = new TreeMap<>();
 
     public void run() {
         System.out.println("Collector beginning...");
@@ -40,17 +46,20 @@ public class Collector {
 
             uncheckedReferencesList = new TreeMap<>();
             uncheckedReferencesList = getUncheckedReferencesListFromDB();
+            keywordsList = new TreeMap<>();
+            keywordsList = getKeywordsListFromDB();
 
             sortUncheckedListForParsing(uncheckedReferencesList);
 
-            startRobotsTxtParser();
-            startSitemapsParser();
-            startGzipFileManager();
-            startXmlFileManager();
-            //startHtmlsParser();
+            if(!robotsTxtReferenceList.isEmpty()) startRobotsTxtParser();
+            if(!sitemapReferenceList.isEmpty()) startSitemapsParser();
+            if(!gzArchivesList.isEmpty()) startGzipFileManager();
+            if(!xmlFilesList.isEmpty()) startXmlFileManager();
+            if(!htmlsReferenceList.isEmpty()) startHtmlsParser();
 
             clearAllLists();
             insertNewPagesListIntoDB();
+            insertNewRankListIntoDB();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -72,6 +81,13 @@ public class Collector {
         pagesTableReader.start();
         pagesTableReader.join();
         return pagesTableReader.getUncheckedReferencesList();
+    }
+
+    private TreeMap<String, Integer> getKeywordsListFromDB() throws InterruptedException {
+        keywordsTableReader = new KeywordsTableReader();
+        keywordsTableReader.start();
+        keywordsTableReader.join();
+        return keywordsTableReader.getKeywordsList();
     }
 
     private void sortUncheckedListForParsing(TreeMap<Integer, String> list) {
@@ -126,6 +142,17 @@ public class Collector {
         newPagesList.putAll(xmlFileManager.getNewPagesList());
     }
 
+    private void startHtmlsParser() throws InterruptedException {
+        htmlsParser = new HtmlsParser();
+        htmlsParser.setUncheckedHtmlsReferencesList(htmlsReferenceList);
+        htmlsParser.setKeywordsList(keywordsList);
+        htmlsParser.start();
+        htmlsParser.join();
+        personPageRankList.putAll(htmlsParser.getPersonPageRankList());
+    }
+
+
+
     private void insertNewPagesListIntoDB() {
         pagesTableWriter = new PagesTableWriter();
         try {
@@ -136,12 +163,23 @@ public class Collector {
         newPagesList.clear();
     }
 
+    private void insertNewRankListIntoDB() {
+        personPageRankWriter = new PersonPageRankWriter();
+        try {
+            personPageRankWriter.insertNewPersonPageRankList(personPageRankList);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void clearAllLists() {
         robotsTxtReferenceList.clear();
         gzArchivesList.clear();
         xmlFilesList.clear();
         sitemapReferenceList.clear();
         htmlsReferenceList.clear();
+        //personPageRankList.clear();
+        //newPagesList.clear();
     }
 
 }

@@ -19,7 +19,9 @@ public class XmlFileManager extends Thread {
     private FileDownloader fileDownloader;
 
     public void run() {
+        System.out.println("XmlFileManager begining...");
         initSitemapXMlFiles();
+        System.out.println("XmlFileManager end");
     }
 
     public void setXmlFilesList(TreeMap<String, Integer> xmlFilesList) {

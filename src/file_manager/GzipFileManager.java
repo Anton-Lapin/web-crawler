@@ -1,6 +1,6 @@
 /**
  * @author Anton Lapin
- * @version Feb 23, 2018
+ * @version Feb 25, 2018
  */
 
 package file_manager;
@@ -22,7 +22,9 @@ public class GzipFileManager extends Thread {
     private XmlFileManager xmlFileManager;
 
     public void run() {
+        System.out.println("GzipFileManager begining...");
         initGZFiles();
+        System.out.println("GzipFileManager end");
     }
 
     private void initGZFiles() {
