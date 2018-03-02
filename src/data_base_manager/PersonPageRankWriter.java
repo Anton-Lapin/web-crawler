@@ -13,7 +13,9 @@ import java.util.TreeMap;
 public class PersonPageRankWriter {
     private Connection connection;
     private Statement stmt;
-    private TreeMap<String, Integer> newPersonPageRank;
+    private int personID;
+    private int siteID;
+    private int rank;
 
     private void connect() throws Exception{
         Class.forName("org.sqlite.JDBC");
@@ -36,11 +38,11 @@ public class PersonPageRankWriter {
         Set<Map.Entry<String, Integer>> set = list.entrySet();
         for (Map.Entry<String, Integer> o : set) {
             String[] split = o.getKey().split(" ");
-            int personID = Integer.parseInt(split[0]);
-            int siteID = Integer.parseInt(split[1]);
-            int rank = o.getValue();
-            stmt.executeUpdate("INSERT INTO PersonPagesRank (PersonID, PageID, Rank) VALUES ('"
-                    + personID + "','" + siteID + "','" + rank + "')");
+            this.personID = Integer.parseInt(split[0]);
+            this.siteID = Integer.parseInt(split[1]);
+            this.rank = o.getValue();
+            stmt.executeUpdate("INSERT INTO PersonPageRank (PersonID, PageID, Rank) VALUES ('"
+                    + this.personID + "','" + this.siteID + "','" + this.rank + "')");
         }
         connection.setAutoCommit(true);
         disconnect();

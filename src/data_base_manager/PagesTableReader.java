@@ -6,12 +6,18 @@
 package data_base_manager;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.SimpleFormatter;
 
 public class PagesTableReader extends Thread {
     private Connection connection;
     private Statement stmt;
     private TreeMap<Integer, String> uncheckedReferencesList;
+    private long currentTime;
+    private String lastScanDate;
 
     public void run(){
         System.out.println("PagesTableReader beginning...");
@@ -41,15 +47,18 @@ public class PagesTableReader extends Thread {
     }
 
     private void searchUncheckedReferences() throws SQLException {
-        uncheckedReferencesList = new TreeMap<>();
+        this.uncheckedReferencesList = new TreeMap<>();
         ResultSet rs = this.stmt.executeQuery("SELECT * FROM Pages\n" +
                 "   WHERE LastScanDate = 'null';");
         while(rs.next()) {
             System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3));
-            uncheckedReferencesList.put(rs.getInt(1), rs.getString(2) + " " + rs.getInt(3));
+            this.uncheckedReferencesList.put(rs.getInt(1), rs.getString(2) + " " + rs.getInt(3));
         }
-        //drop table (unnesessary)
-        stmt.executeUpdate("DELETE FROM Pages");
+
+        this.currentTime = System.currentTimeMillis();
+        this.lastScanDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(this.currentTime);
+        stmt.executeUpdate("UPDATE Pages SET LastScanDate = '" + this.lastScanDate + "' WHERE LastScanDate = 'null';");
+
     }
 
     public void clearTable() {
@@ -64,6 +73,6 @@ public class PagesTableReader extends Thread {
     }
 
     public TreeMap<Integer, String> getUncheckedReferencesList() {
-        return uncheckedReferencesList;
+        return this.uncheckedReferencesList;
     }
 }

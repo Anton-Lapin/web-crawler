@@ -6,6 +6,8 @@
 package data_base_manager;
 
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -15,12 +17,19 @@ public class PagesTableWriter extends Thread {
     private Statement stmt;
     private SitesTableReader sitesTableReader;
     private TreeMap<Integer, String> newSitesList;
+    private int id;
+    private String url;
+    private int siteId;
+    private long currentTime;
+    private String foundDateTime;
+    private String lastScanDate = null;
 
     public void run(){
         System.out.println("PagesTableWriter beginning...");
         try{
             connect();
-            addStandardRobotsTxtReference();
+            getNewSitesListFromSTR();
+            if(!newSitesList.isEmpty()) addStandardRobotsTxtReference();
         }catch (Exception e){
             e.printStackTrace();
         }finally {
@@ -43,7 +52,7 @@ public class PagesTableWriter extends Thread {
         }
     }
 
-    private void addStandardRobotsTxtReference() throws SQLException{
+    private void getNewSitesListFromSTR() {
         sitesTableReader = new SitesTableReader();
         sitesTableReader.start();
         try {
@@ -52,21 +61,22 @@ public class PagesTableWriter extends Thread {
             e.printStackTrace();
         }
         newSitesList = sitesTableReader.getNewSitesList();
-        int id = 1;
+    }
+
+    private void addStandardRobotsTxtReference() throws SQLException{
+        this.id = 1;
         ResultSet rs = this.stmt.executeQuery("SELECT MAX(ID) FROM Pages");
-        id += rs.getInt(1);
-        String url;
-        int siteId;
-        String foundDateTime = null;
-        String lastScanDate = null;
+        this.id += rs.getInt(1);
         connection.setAutoCommit(false);
         Set<Map.Entry<Integer, String>> set = newSitesList.entrySet();
         for (Map.Entry<Integer, String> o : set) {
-            url = "http://" + o.getValue() + "/robots.txt";
-            siteId = o.getKey();
-            //?
+            this.url = "http://" + o.getValue() + "/robots.txt";
+            this.siteId = o.getKey();
+            this.currentTime = System.currentTimeMillis();
+            this.foundDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(this.currentTime);
             stmt.executeUpdate("INSERT INTO Pages (ID, Url, SiteID, FoundDateTime, LastScanDate) VALUES ('"
-                    + id + "','" + url + "','" + siteId + "','" + foundDateTime + "','" + lastScanDate + "')");
+                    + this.id + "','" + this.url + "','" + this.siteId + "','" + this.foundDateTime + "','"
+                    + this.lastScanDate + "')");
             id++;
         }
         connection.setAutoCommit(true);
@@ -74,21 +84,19 @@ public class PagesTableWriter extends Thread {
 
     public void insertNewPagesList(TreeMap<String, Integer> list) throws Exception {
         connect();
-        int id = 1;
+        this.id = 1;
         ResultSet rs = this.stmt.executeQuery("SELECT MAX(ID) FROM Pages");
-        id += rs.getInt(1);
-        String url;
-        int siteId;
-        String foundDateTime = null;
-        String lastScanDate = null;
+        this.id += rs.getInt(1);
         connection.setAutoCommit(false);
         Set<Map.Entry<String, Integer>> set = list.entrySet();
         for (Map.Entry<String, Integer> o : set) {
-            url = o.getKey();
-            siteId = o.getValue();
-            //?
+            this.url = o.getKey();
+            this.siteId = o.getValue();
+            this.currentTime = System.currentTimeMillis();
+            this.foundDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(this.currentTime);
             stmt.executeUpdate("INSERT INTO Pages (ID, Url, SiteID, FoundDateTime, LastScanDate) VALUES ('"
-                    + id + "','" + url + "','" + siteId + "','" + foundDateTime + "','" + lastScanDate + "')");
+                    + this.id + "','" + this.url + "','" + this.siteId + "','" + this.foundDateTime + "','"
+                    + this.lastScanDate + "')");
             id++;
         }
         connection.setAutoCommit(true);

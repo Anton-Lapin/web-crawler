@@ -41,15 +41,15 @@ public class KeywordsTableReader extends Thread {
     }
 
     private void createKeywordsList() throws SQLException {
-        keywordsList = new TreeMap<>();
+        this.keywordsList = new TreeMap<>();
         ResultSet rs = this.stmt.executeQuery("SELECT * FROM Keywords;");
         while(rs.next()) {
             System.out.println(rs.getString(2) + " " + rs.getInt(3));
-            keywordsList.put(rs.getString(2), rs.getInt(3));
+            this.keywordsList.put(rs.getString(2), rs.getInt(3));
         }
     }
 
     public TreeMap<String, Integer> getKeywordsList() {
-        return keywordsList;
+        return this.keywordsList;
     }
 }
