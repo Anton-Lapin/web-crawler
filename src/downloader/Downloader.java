@@ -14,29 +14,29 @@ public class Downloader {
 
     private String result;
     private StringBuilder stringSum = new StringBuilder();
-    private BufferedReader reader = null;
-    private URL site = null;
+    private BufferedReader reader;
+    private URL site;
+    private String line;
 
     public String exec(String url) {
         try {
-            site = new URL(url);
-            reader = new BufferedReader(new InputStreamReader(site.openStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                stringSum.append(line);
-                stringSum.append(" ");
+            this.site = new URL(url);
+            this.reader = new BufferedReader(new InputStreamReader(site.openStream()));
+            while ((this.line = this.reader.readLine()) != null) {
+                this.stringSum.append(line);
+                this.stringSum.append(" ");
             }
-            result = stringSum.toString();
-            reader.close();
+            this.result = stringSum.toString();
+            this.reader.close();
         } catch (IOException ex) {
-            //...
+            ex.printStackTrace();
         } finally {
             try {
-                reader.close();
+                this.reader.close();
             } catch (IOException ex) {
-                //...
+                ex.printStackTrace();
             }
         }
-        return result;
+        return this.result;
     }
 }

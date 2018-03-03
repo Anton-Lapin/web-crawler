@@ -20,13 +20,12 @@ public class StringWorker {
         for (int i = 0; i < this.length; i++) {
             if (this.splitResult[i].contains("</loc>")){
                 this.subsplit=this.splitResult[i].split("</loc>");//делим подстроку на подподстроки
-//                System.out.println(this.subsplit[0]);
                 this.heapString.append(this.subsplit[0]);
                 this.heapString.append(" "); //и кладем первую
 //                подподстроку в текущую строку  (и будет являться ссылкой)
             }
         }
-        result = String.valueOf(heapString);
+        this.result = String.valueOf(this.heapString);
         this.subsplit = null;
         return this.result;
     }

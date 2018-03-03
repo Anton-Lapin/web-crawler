@@ -10,25 +10,30 @@ import java.io.IOException;
 import java.net.URL;
 
 public class FileDownloader {
+    private BufferedInputStream bis;
+    private FileOutputStream fos;
+    private URL url;
+    private byte[] buffer;
+    private int count;
 
     public void downloadUsingStream(String urlStr, String file) {
-        BufferedInputStream bis = null;
-        FileOutputStream fos = null;
+        this.bis = null;
+        this.fos = null;
         try {
-            URL url = new URL(urlStr);
-            bis = new BufferedInputStream(url.openStream());
-            fos = new FileOutputStream(file);
-            byte[] buffer = new byte[1024];
-            int count = 0;
-            while ((count = bis.read(buffer, 0, 1024)) != -1) {
-                fos.write(buffer, 0, count);
+            this.url = new URL(urlStr);
+            this.bis = new BufferedInputStream(url.openStream());
+            this.fos = new FileOutputStream(file);
+            this.buffer = new byte[1024];
+            this.count = 0;
+            while ((this.count = this.bis.read(this.buffer, 0, 1024)) != -1) {
+                this.fos.write(this.buffer, 0, this.count);
             }
         } catch (IOException e){
             e.printStackTrace();
         } finally {
             try {
-                fos.close();
-                bis.close();
+                this.fos.close();
+                this.bis.close();
             } catch (IOException e){
                 e.printStackTrace();
             }

@@ -16,44 +16,46 @@ public class RobotsTxtParser extends Thread {
     private Downloader downloader;
     private String pageContent;
     private TreeMap<String, Integer> newPagesList = new TreeMap<>();
+    private String url;
+    private String[] splitContent;
 
     public void run() {
         System.out.println("RobotsTxtParser beginning...");
 
-        Set<Map.Entry<String, Integer>> set = uncheckedRobotsTxtReferencesList.entrySet();
-        for (Map.Entry<String, Integer> o : set) {
-            System.out.println(o.getKey() + " " + o.getValue());
-        }
-        startDownloader(uncheckedRobotsTxtReferencesList);
+//        Set<Map.Entry<String, Integer>> set = uncheckedRobotsTxtReferencesList.entrySet();
+//        for (Map.Entry<String, Integer> o : set) {
+//            System.out.println(o.getKey() + " " + o.getValue());
+//        }
+        startDownloader(this.uncheckedRobotsTxtReferencesList);
         System.out.println("RobotsTxtParser end");
     }
 
     public void setUncheckedRobotsTxtReferencesList(TreeMap<String, Integer> list) {
-        uncheckedRobotsTxtReferencesList = list;
+        this.uncheckedRobotsTxtReferencesList = list;
     }
 
     private void startDownloader(TreeMap<String, Integer> list) {
-        downloader = new Downloader();
+        this.downloader = new Downloader();
         Set<Map.Entry<String, Integer>> set = list.entrySet();
         for (Map.Entry<String, Integer> o : set) {
-            String url = o.getKey();
-            pageContent = downloader.exec(url);
-            pageContentHandle(pageContent, o.getValue());
+            this.url = o.getKey();
+            this.pageContent = this.downloader.exec(this.url);
+            pageContentHandle(this.pageContent, o.getValue());
             System.out.println(pageContent);
             System.out.println("-----------------------------");
         }
     }
 
     private void pageContentHandle(String pageContent, Integer siteId){
-        String[] split = pageContent.split(" ");
-        for (int i = 0; i < split.length; i++) {
-            if(split[i].contains("sitemap") && split[i].contains("http")) {
-                newPagesList.put(split[i], siteId);
+        this.splitContent = pageContent.split(" ");
+        for (int i = 0; i < this.splitContent.length; i++) {
+            if(this.splitContent[i].contains("sitemap") && this.splitContent[i].contains("http")) {
+                this.newPagesList.put(this.splitContent[i], siteId);
             }
         }
     }
 
     public TreeMap<String, Integer> getNewPagesList() {
-        return newPagesList;
+        return this.newPagesList;
     }
 }

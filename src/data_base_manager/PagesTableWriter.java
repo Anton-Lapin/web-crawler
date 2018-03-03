@@ -97,7 +97,7 @@ public class PagesTableWriter extends Thread {
             stmt.executeUpdate("INSERT INTO Pages (ID, Url, SiteID, FoundDateTime, LastScanDate) VALUES ('"
                     + this.id + "','" + this.url + "','" + this.siteId + "','" + this.foundDateTime + "','"
                     + this.lastScanDate + "')");
-            id++;
+            this.id++;
         }
         connection.setAutoCommit(true);
         disconnect();

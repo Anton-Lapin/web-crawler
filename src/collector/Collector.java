@@ -39,27 +39,33 @@ public class Collector {
     private TreeMap<String, Integer> newPagesList = new TreeMap<>();
     private TreeMap<String, Integer> personPageRankList = new TreeMap<>();
 
+    private String reference;
+    private String[] splittedValue;
+    private int id;
+
     public void run() {
         System.out.println("Collector beginning...");
         try {
             startPagesTableWriter();
 
-            uncheckedReferencesList = new TreeMap<>();
-            uncheckedReferencesList = getUncheckedReferencesListFromDB();
-            keywordsList = new TreeMap<>();
-            keywordsList = getKeywordsListFromDB();
+            this.uncheckedReferencesList = new TreeMap<>();
+            this.uncheckedReferencesList = getUncheckedReferencesListFromDB();
 
-            sortUncheckedListForParsing(uncheckedReferencesList);
+            sortUncheckedListForParsing(this.uncheckedReferencesList);
 
-            if(!robotsTxtReferenceList.isEmpty()) startRobotsTxtParser();
-            if(!sitemapReferenceList.isEmpty()) startSitemapsParser();
-            if(!gzArchivesList.isEmpty()) startGzipFileManager();
-            if(!xmlFilesList.isEmpty()) startXmlFileManager();
-            if(!htmlsReferenceList.isEmpty()) startHtmlsParser();
+            if(!this.robotsTxtReferenceList.isEmpty()) startRobotsTxtParser();
+            if(!this.sitemapReferenceList.isEmpty()) startSitemapsParser();
+            if(!this.gzArchivesList.isEmpty()) startGzipFileManager();
+            if(!this.xmlFilesList.isEmpty()) startXmlFileManager();
+            if(!this.htmlsReferenceList.isEmpty()){
+                this.keywordsList = new TreeMap<>();
+                this.keywordsList = getKeywordsListFromDB();
+                startHtmlsParser();
+            }
 
-            clearAllLists();
             insertNewPagesListIntoDB();
             insertNewRankListIntoDB();
+            clearAllLists();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -67,119 +73,119 @@ public class Collector {
     }
 
     private void startPagesTableWriter() {
-        pagesTableWriter = new PagesTableWriter();
-        pagesTableWriter.start();
+        this.pagesTableWriter = new PagesTableWriter();
+        this.pagesTableWriter.start();
         try {
-            pagesTableWriter.join();
+            this.pagesTableWriter.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     private TreeMap<Integer, String> getUncheckedReferencesListFromDB() throws InterruptedException {
-        pagesTableReader = new PagesTableReader();
-        pagesTableReader.start();
-        pagesTableReader.join();
-        return pagesTableReader.getUncheckedReferencesList();
+        this.pagesTableReader = new PagesTableReader();
+        this.pagesTableReader.start();
+        this.pagesTableReader.join();
+        return this.pagesTableReader.getUncheckedReferencesList();
     }
 
     private TreeMap<String, Integer> getKeywordsListFromDB() throws InterruptedException {
-        keywordsTableReader = new KeywordsTableReader();
-        keywordsTableReader.start();
-        keywordsTableReader.join();
-        return keywordsTableReader.getKeywordsList();
+        this.keywordsTableReader = new KeywordsTableReader();
+        this.keywordsTableReader.start();
+        this.keywordsTableReader.join();
+        return this.keywordsTableReader.getKeywordsList();
     }
 
     private void sortUncheckedListForParsing(TreeMap<Integer, String> list) {
         Set<Map.Entry<Integer, String>> set = list.entrySet();
         for (Map.Entry<Integer, String> o : set) {
-            String reference = o.getValue();
-            String[] splittedValue = reference.split(" ");
-            Integer id = Integer.parseInt(splittedValue[1]);
-            if(splittedValue[0].contains("robots.txt")) {
-                robotsTxtReferenceList.put(splittedValue[0], id);
-            } else if(splittedValue[0].endsWith(".gz")) {
-                gzArchivesList.put(splittedValue[0], id);
-            } else if(splittedValue[0].endsWith(".xml")) {
-                xmlFilesList.put(splittedValue[0], id);
-            } else if(splittedValue[0].contains("sitemap")) {
-                sitemapReferenceList.put(splittedValue[0], id);
-            } else if(splittedValue[0].endsWith(".html")) {
-                htmlsReferenceList.put(splittedValue[0], id);
+            this.reference = o.getValue();
+            this.splittedValue = this.reference.split(" ");
+            this.id = Integer.parseInt(this.splittedValue[1]);
+            if(this.splittedValue[0].contains("robots.txt")) {
+                this.robotsTxtReferenceList.put(this.splittedValue[0], this.id);
+            } else if(this.splittedValue[0].endsWith(".gz")) {
+                this.gzArchivesList.put(this.splittedValue[0], this.id);
+            } else if(this.splittedValue[0].endsWith(".xml")) {
+                this.xmlFilesList.put(this.splittedValue[0], this.id);
+            } else if(this.splittedValue[0].contains("sitemap")) {
+                this.sitemapReferenceList.put(this.splittedValue[0], this.id);
+            } else if(this.splittedValue[0].endsWith(".html")) {
+                this.htmlsReferenceList.put(this.splittedValue[0], this.id);
             }
         }
     }
 
     private void startRobotsTxtParser() throws InterruptedException {
-        robotsTxtParser = new RobotsTxtParser();
-        robotsTxtParser.setUncheckedRobotsTxtReferencesList(robotsTxtReferenceList);
-        robotsTxtParser.start();
-        robotsTxtParser.join();
-        newPagesList.putAll(robotsTxtParser.getNewPagesList());
+        this.robotsTxtParser = new RobotsTxtParser();
+        this.robotsTxtParser.setUncheckedRobotsTxtReferencesList(this.robotsTxtReferenceList);
+        this.robotsTxtParser.start();
+        this.robotsTxtParser.join();
+        this.newPagesList.putAll(this.robotsTxtParser.getNewPagesList());
     }
 
     private void startSitemapsParser() throws InterruptedException {
-        sitemapsParser = new SitemapsParser();
-        sitemapsParser.setUncheckedSitemapReferencesList(sitemapReferenceList);
-        sitemapsParser.start();
-        sitemapsParser.join();
-        newPagesList.putAll(sitemapsParser.getNewPagesList());
+        this.sitemapsParser = new SitemapsParser();
+        this.sitemapsParser.setUncheckedSitemapReferencesList(this.sitemapReferenceList);
+        this.sitemapsParser.start();
+        this.sitemapsParser.join();
+        this.newPagesList.putAll(this.sitemapsParser.getNewPagesList());
     }
 
     private void startGzipFileManager() throws InterruptedException {
-        gzipFileManager = new GzipFileManager();
-        gzipFileManager.setGzipArchivesList(gzArchivesList);
-        gzipFileManager.start();
-        gzipFileManager.join();
-        newPagesList.putAll(gzipFileManager.getNewPagesList());
+        this.gzipFileManager = new GzipFileManager();
+        this.gzipFileManager.setGzipArchivesList(this.gzArchivesList);
+        this.gzipFileManager.start();
+        this.gzipFileManager.join();
+        this.newPagesList.putAll(this.gzipFileManager.getNewPagesList());
     }
 
     private void startXmlFileManager() throws InterruptedException {
-        xmlFileManager = new XmlFileManager();
-        xmlFileManager.setXmlFilesList(xmlFilesList);
-        xmlFileManager.start();
-        xmlFileManager.join();
-        newPagesList.putAll(xmlFileManager.getNewPagesList());
+        this.xmlFileManager = new XmlFileManager();
+        this.xmlFileManager.setXmlFilesList(this.xmlFilesList);
+        this.xmlFileManager.start();
+        this.xmlFileManager.join();
+        this.newPagesList.putAll(this.xmlFileManager.getNewPagesList());
     }
 
     private void startHtmlsParser() throws InterruptedException {
-        htmlsParser = new HtmlsParser();
-        htmlsParser.setUncheckedHtmlsReferencesList(htmlsReferenceList);
-        htmlsParser.setKeywordsList(keywordsList);
-        htmlsParser.start();
-        htmlsParser.join();
-        personPageRankList.putAll(htmlsParser.getPersonPageRankList());
+        this.htmlsParser = new HtmlsParser();
+        this.htmlsParser.setUncheckedHtmlsReferencesList(this.htmlsReferenceList);
+        this.htmlsParser.setKeywordsList(this.keywordsList);
+        this.htmlsParser.start();
+        this.htmlsParser.join();
+        this.personPageRankList.putAll(this.htmlsParser.getPersonPageRankList());
     }
 
 
 
     private void insertNewPagesListIntoDB() {
-        pagesTableWriter = new PagesTableWriter();
+        this.pagesTableWriter = new PagesTableWriter();
         try {
-            pagesTableWriter.insertNewPagesList(newPagesList);
+            this.pagesTableWriter.insertNewPagesList(this.newPagesList);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        newPagesList.clear();
+        this.newPagesList.clear();
     }
 
     private void insertNewRankListIntoDB() {
-        personPageRankWriter = new PersonPageRankWriter();
+        this.personPageRankWriter = new PersonPageRankWriter();
         try {
-            personPageRankWriter.insertNewPersonPageRankList(personPageRankList);
+            this.personPageRankWriter.insertNewPersonPageRankList(this.personPageRankList);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void clearAllLists() {
-        robotsTxtReferenceList.clear();
-        gzArchivesList.clear();
-        xmlFilesList.clear();
-        sitemapReferenceList.clear();
-        htmlsReferenceList.clear();
-        //personPageRankList.clear();
-        //newPagesList.clear();
+        this.robotsTxtReferenceList.clear();
+        this.gzArchivesList.clear();
+        this.xmlFilesList.clear();
+        this.sitemapReferenceList.clear();
+        this.htmlsReferenceList.clear();
+        this.keywordsList.clear();
+        this.personPageRankList.clear();
+        this.newPagesList.clear();
     }
-
 }

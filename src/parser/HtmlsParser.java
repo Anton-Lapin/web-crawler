@@ -16,6 +16,12 @@ public class HtmlsParser extends Thread {
     private TreeMap<String, Integer> keywordsList = new TreeMap<>();
     private TreeMap<String, Integer> personPageRankList = new TreeMap<>();
     private Downloader downloader;
+    private int rank;
+    private String url;
+    private String content;
+    private String[] splitContent;
+    private int personID;
+    private int siteID;
 
     public void run() {
         calculatePersonRank();
@@ -30,29 +36,28 @@ public class HtmlsParser extends Thread {
     }
 
     private void calculatePersonRank() {
-        downloader = new Downloader();
-        Set<Map.Entry<String, Integer>> set = uncheckedHtmlsReferencesList.entrySet();
-        Set<Map.Entry<String, Integer>> set1 = keywordsList.entrySet();
-        int rank;
+        this.downloader = new Downloader();
+        Set<Map.Entry<String, Integer>> set = this.uncheckedHtmlsReferencesList.entrySet();
+        Set<Map.Entry<String, Integer>> set1 = this.keywordsList.entrySet();
         for (Map.Entry<String, Integer> o : set) {
-            rank = 0;
-            String url = o.getKey();
-            String content = downloader.exec(url);
-            String[] splitContent = content.split(" ");
+            this.rank = 0;
+            this.url = o.getKey();
+            this.content = this.downloader.exec(this.url);
+            this.splitContent = this.content.split(" ");
             for (Map.Entry<String, Integer> o1 : set1) {
-                for (String word : splitContent) {
+                for (String word : this.splitContent) {
                     if (word.equals(o1.getKey())) {
-                        rank++;
+                        this.rank++;
                     }
                 }
-                int personID = o1.getValue();
-                int siteID = o.getValue();
-                personPageRankList.put(personID + " " + siteID, rank);
+                this.personID = o1.getValue();
+                this.siteID = o.getValue();
+                this.personPageRankList.put(this.personID + " " + this.siteID, this.rank);
             }
         }
     }
 
     public TreeMap<String, Integer> getPersonPageRankList() {
-        return personPageRankList;
+        return this.personPageRankList;
     }
 }

@@ -46,11 +46,11 @@ public class SitesTableReader extends Thread {
                 "   WHERE Pages.Url IS NULL;");
         while(rs.next()) {
             System.out.println(rs.getInt(1) + " " + rs.getString(2));
-            newSitesList.put(rs.getInt(1), rs.getString(2));
+            this.newSitesList.put(rs.getInt(1), rs.getString(2));
         }
     }
 
     public TreeMap<Integer, String> getNewSitesList() {
-        return newSitesList;
+        return this.newSitesList;
     }
 }
