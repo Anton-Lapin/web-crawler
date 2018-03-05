@@ -20,13 +20,13 @@ import java.util.Set;
 import java.util.TreeMap;
 
 public class Collector {
-    private TreeMap<Integer, String> uncheckedReferencesList;
+    private TreeMap<Integer, String> uncheckedReferencesList = new TreeMap<>();
     private TreeMap<String, Integer> robotsTxtReferenceList = new TreeMap<>();
     private TreeMap<String, Integer> sitemapReferenceList = new TreeMap<>();
     private TreeMap<String, Integer> htmlsReferenceList = new TreeMap<>();
     private TreeMap<String, Integer> xmlFilesList = new TreeMap<>();
     private TreeMap<String, Integer> gzArchivesList = new TreeMap<>();
-    private TreeMap<String, Integer> keywordsList;
+    private TreeMap<String, Integer> keywordsList = new TreeMap<>();
     private PagesTableReader pagesTableReader;
     private PagesTableWriter pagesTableWriter;
     private RobotsTxtParser robotsTxtParser;
@@ -47,25 +47,14 @@ public class Collector {
         System.out.println("Collector beginning...");
         try {
             startPagesTableWriter();
-
-            this.uncheckedReferencesList = new TreeMap<>();
-            this.uncheckedReferencesList = getUncheckedReferencesListFromDB();
-
-            sortUncheckedListForParsing(this.uncheckedReferencesList);
-
-            if(!this.robotsTxtReferenceList.isEmpty()) startRobotsTxtParser();
-            if(!this.sitemapReferenceList.isEmpty()) startSitemapsParser();
-            if(!this.gzArchivesList.isEmpty()) startGzipFileManager();
-            if(!this.xmlFilesList.isEmpty()) startXmlFileManager();
-            if(!this.htmlsReferenceList.isEmpty()){
-                this.keywordsList = new TreeMap<>();
-                this.keywordsList = getKeywordsListFromDB();
-                startHtmlsParser();
-            }
-
-            insertNewPagesListIntoDB();
-            insertNewRankListIntoDB();
-            clearAllLists();
+            do {
+                this.uncheckedReferencesList = getUncheckedReferencesListFromDB();
+                sortUncheckedListForParsing(this.uncheckedReferencesList);
+                startAllParsersAndFileManagers();
+                insertNewPagesListIntoDB();
+                insertNewRankListIntoDB();
+                clearAllLists();
+            } while(!this.uncheckedReferencesList.isEmpty());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -113,6 +102,18 @@ public class Collector {
             } else if(this.splittedValue[0].endsWith(".html")) {
                 this.htmlsReferenceList.put(this.splittedValue[0], this.id);
             }
+        }
+    }
+
+    private void startAllParsersAndFileManagers() throws  InterruptedException {
+        if (!this.robotsTxtReferenceList.isEmpty()) startRobotsTxtParser();
+        if (!this.sitemapReferenceList.isEmpty()) startSitemapsParser();
+        if (!this.gzArchivesList.isEmpty()) startGzipFileManager();
+        if (!this.xmlFilesList.isEmpty()) startXmlFileManager();
+        if (!this.htmlsReferenceList.isEmpty()) {
+            this.keywordsList = new TreeMap<>();
+            this.keywordsList = getKeywordsListFromDB();
+            startHtmlsParser();
         }
     }
 

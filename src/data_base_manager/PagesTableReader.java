@@ -5,6 +5,8 @@
  */
 package data_base_manager;
 
+import sun.reflect.generics.tree.Tree;
+
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Map;
@@ -24,6 +26,7 @@ public class PagesTableReader extends Thread {
         try{
             connect();
             searchUncheckedReferences();
+            if(this.uncheckedReferencesList.isEmpty()) searchOldReferences();
         }catch (Exception e){
             e.printStackTrace();
         }finally {
@@ -51,24 +54,22 @@ public class PagesTableReader extends Thread {
         ResultSet rs = this.stmt.executeQuery("SELECT * FROM Pages\n" +
                 "   WHERE LastScanDate = 'null';");
         while(rs.next()) {
-            System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3));
+            //System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3));
             this.uncheckedReferencesList.put(rs.getInt(1), rs.getString(2) + " " + rs.getInt(3));
         }
 
         this.currentTime = System.currentTimeMillis();
         this.lastScanDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(this.currentTime);
         stmt.executeUpdate("UPDATE Pages SET LastScanDate = '" + this.lastScanDate + "' WHERE LastScanDate = 'null';");
-
     }
 
-    public void clearTable() {
-        try {
-            connect();
-            stmt.executeUpdate("DELETE FROM Pages");
-        } catch (Exception e) {
-
-        } finally {
-            disconnect();
+    private void searchOldReferences() throws SQLException {
+        ResultSet rs = this.stmt.executeQuery("SELECT * FROM Pages\n" +
+                "    WHERE MIN(LastScanDate);");//?проверить правильность запроса
+        while (rs.next()) {
+            if(rs.getString(2).contains("sitemap")) {
+                this.uncheckedReferencesList.put(rs.getInt(1), rs.getString(2) + " " + rs.getInt(3));
+            }
         }
     }
 
