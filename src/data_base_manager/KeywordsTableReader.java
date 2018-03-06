@@ -1,5 +1,5 @@
 /**
- *
+ * Класс подключается к базе данных, считывает из таблицы Keywords список ключевых слов
  * @author Anton Lapin
  * @version date Feb 25, 2018
  */
@@ -9,36 +9,31 @@ import java.sql.*;
 import java.util.TreeMap;
 
 public class KeywordsTableReader extends Thread {
-    private Connection connection;
+    private DBConnector connector = new DBConnector();
     private Statement stmt;
     private TreeMap<String, Integer> keywordsList;
+
+    /**
+     * Точка входа в класс
+     */
 
     public void run(){
         System.out.println("KeywordsTableReader beginning...");
         try{
-            connect();
+            connector.connect();
             createKeywordsList();
         }catch (Exception e){
             e.printStackTrace();
         }finally {
-            disconnect();
+            connector.disconnect();
         }
         System.out.println("KeywordsTableReader end");
     }
 
-    private void connect() throws Exception{
-        Class.forName("org.sqlite.JDBC");
-        connection = DriverManager.getConnection("jdbc:sqlite:data.db");
-        stmt = connection.createStatement();
-    }
-
-    private void disconnect(){
-        try {
-            connection.close();
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
-    }
+    /**
+     * Метод делает запрос в БД в таблицу Keywords; записывает полученные данные в список ключевых слов keywordsList
+     * @throws SQLException
+     */
 
     private void createKeywordsList() throws SQLException {
         this.keywordsList = new TreeMap<>();
@@ -48,6 +43,11 @@ public class KeywordsTableReader extends Thread {
             this.keywordsList.put(rs.getString(2), rs.getInt(3));
         }
     }
+
+    /**
+     * Метод возвращает список ключевых слов
+     * @return keywordsList
+     */
 
     public TreeMap<String, Integer> getKeywordsList() {
         return this.keywordsList;

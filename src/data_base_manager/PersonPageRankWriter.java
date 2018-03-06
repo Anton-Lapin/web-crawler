@@ -1,5 +1,5 @@
 /**
- *
+ * Класс подключается к БД; записывает в таблицу PersonPageRank список рейтингов популярности личностей по сайтам
  * @author Anton Lapin
  * @version date Feb 25, 2018
  */
@@ -11,28 +11,21 @@ import java.util.Set;
 import java.util.TreeMap;
 
 public class PersonPageRankWriter {
+    private DBConnector connector = new DBConnector();
     private Connection connection;
     private Statement stmt;
     private int personID;
     private int siteID;
     private int rank;
 
-    private void connect() throws Exception{
-        Class.forName("org.sqlite.JDBC");
-        connection = DriverManager.getConnection("jdbc:sqlite:data.db");
-        stmt = connection.createStatement();
-    }
-
-    private void disconnect(){
-        try {
-            connection.close();
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
-    }
+    /**
+     * Метод подключается к БД; очищает таблицу PersonPageRank от старых данных; записывает новый список рейтингов
+     * @param list
+     * @throws Exception
+     */
 
     public void insertNewPersonPageRankList(TreeMap<String, Integer> list) throws Exception {
-        connect();
+        connector.connect();
         stmt.executeUpdate("DELETE FROM PersonPageRank");
         connection.setAutoCommit(false);
         Set<Map.Entry<String, Integer>> set = list.entrySet();
@@ -45,7 +38,7 @@ public class PersonPageRankWriter {
                     + this.personID + "','" + this.siteID + "','" + this.rank + "')");
         }
         connection.setAutoCommit(true);
-        disconnect();
+        connector.disconnect();
     }
 
 }

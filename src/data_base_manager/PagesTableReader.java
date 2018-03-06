@@ -1,53 +1,46 @@
 /**
- *
+ * Класс подключается к базе данных и считывает из таблицы Pages список непроверенных ссылок.
  * @author Anton Lapin
  * @version date 18 February 2018
  */
 package data_base_manager;
 
-import sun.reflect.generics.tree.Tree;
-
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.SimpleFormatter;
 
 public class PagesTableReader extends Thread {
-    private Connection connection;
+    private DBConnector connector = new DBConnector();
     private Statement stmt;
     private TreeMap<Integer, String> uncheckedReferencesList;
     private long currentTime;
     private String lastScanDate;
 
-    public void run(){
+    /**
+     * Точка входа в класс
+     */
+
+    public void run() {
         System.out.println("PagesTableReader beginning...");
-        try{
-            connect();
+        try {
+            connector.connect();
             searchUncheckedReferences();
             if(this.uncheckedReferencesList.isEmpty()) searchOldReferences();
-        }catch (Exception e){
+            this.uncheckedReferencesList.clear();
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            disconnect();
+        } finally {
+            connector.disconnect();
         }
         System.out.println("PagesTableReader end");
     }
 
-    private void connect() throws Exception{
-        Class.forName("org.sqlite.JDBC");
-        connection = DriverManager.getConnection("jdbc:sqlite:data.db");
-        stmt = connection.createStatement();
-    }
-
-    private void disconnect(){
-        try {
-            connection.close();
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
-    }
+    /**
+     * Метод запрашивает из базы данных данные, у которых остсутствует время последней проверки; заносит их в
+     * список неповеренных ссылок uncheckedReferencesList; обновляет у выбранных данных колонку времени последней
+     * проверки на текущее время
+     * @throws SQLException
+     */
 
     private void searchUncheckedReferences() throws SQLException {
         this.uncheckedReferencesList = new TreeMap<>();
@@ -63,15 +56,27 @@ public class PagesTableReader extends Thread {
         stmt.executeUpdate("UPDATE Pages SET LastScanDate = '" + this.lastScanDate + "' WHERE LastScanDate = 'null';");
     }
 
+    /**
+     * Метод запрашивает из базы данных данные, у которых время последней проверки наиболее устаревшее; заносит их в
+     * список неповеренных ссылок uncheckedReferencesList
+     * @throws SQLException
+     */
+
     private void searchOldReferences() throws SQLException {
         ResultSet rs = this.stmt.executeQuery("SELECT * FROM Pages\n" +
                 "    WHERE MIN(LastScanDate);");//?проверить правильность запроса
         while (rs.next()) {
             if(rs.getString(2).contains("sitemap")) {
-                this.uncheckedReferencesList.put(rs.getInt(1), rs.getString(2) + " " + rs.getInt(3));
+                this.uncheckedReferencesList.put(rs.getInt(1), rs.getString(2) + " " +
+                        rs.getInt(3));
             }
         }
     }
+
+    /**
+     * Метод возвращает список непроверенных ссылок
+     * @return uncheckedReferencesList
+     */
 
     public TreeMap<Integer, String> getUncheckedReferencesList() {
         return this.uncheckedReferencesList;

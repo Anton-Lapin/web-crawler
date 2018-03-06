@@ -1,5 +1,7 @@
 /**
- *
+ * Класс подключается к базе данных; запускает нить SitesTable Reader, в результате его работы получает из класса список
+ * названий новых сайтов, у которых еще нет ссылки на robots.txt; создает для них стандартные ссылки и записывает их
+ * в таблицу Pages; записывает в таблицу Pages список новых ссылок, полученных в результате обхода предыдущих ссылок.
  * @author Anton Lapin
  * @version date 18 February 2018
  */
@@ -13,6 +15,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 public class PagesTableWriter extends Thread {
+    private DBConnector connector = new DBConnector();
     private Connection connection;
     private Statement stmt;
     private SitesTableReader sitesTableReader;
@@ -24,33 +27,28 @@ public class PagesTableWriter extends Thread {
     private String foundDateTime;
     private String lastScanDate = null;
 
+    /**
+     * Точка входа в класс
+     */
+
     public void run(){
         System.out.println("PagesTableWriter beginning...");
         try{
-            connect();
+            connector.connect();
             getNewSitesListFromSTR();
             if(!newSitesList.isEmpty()) addStandardRobotsTxtReference();
         }catch (Exception e){
             e.printStackTrace();
         }finally {
-            disconnect();
+            connector.disconnect();
         }
         System.out.println("PagesTableWriter end");
     }
 
-    private void connect() throws Exception{
-        Class.forName("org.sqlite.JDBC");
-        connection = DriverManager.getConnection("jdbc:sqlite:data.db");
-        stmt = connection.createStatement();
-    }
-
-    private void disconnect(){
-        try {
-            connection.close();
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
-    }
+    /**
+     * Метод инициирует нить SitesTableReader; запускает ее; ждет окончания работы нити; получает из SitesTableReader
+     * список названий сайтов, у которых еще нет robots.txt
+     */
 
     private void getNewSitesListFromSTR() {
         sitesTableReader = new SitesTableReader();
@@ -62,6 +60,11 @@ public class PagesTableWriter extends Thread {
         }
         newSitesList = sitesTableReader.getNewSitesList();
     }
+
+    /**
+     * Метод добавляет в таблицу Pages стандартную ссылку на robots.txt с подстановкой названия сайта
+     * @throws SQLException
+     */
 
     private void addStandardRobotsTxtReference() throws SQLException{
         this.id = 1;
@@ -77,13 +80,20 @@ public class PagesTableWriter extends Thread {
             stmt.executeUpdate("INSERT INTO Pages (ID, Url, SiteID, FoundDateTime, LastScanDate) VALUES ('"
                     + this.id + "','" + this.url + "','" + this.siteId + "','" + this.foundDateTime + "','"
                     + this.lastScanDate + "')");
-            id++;
+            this.id++;
         }
         connection.setAutoCommit(true);
     }
 
+    /**
+     * Метод подключается к базе данных; записывает список новых ссылок в таблицу Pages, прописывая время нахождения
+     * ссылки
+     * @param list
+     * @throws Exception
+     */
+
     public void insertNewPagesList(TreeMap<String, Integer> list) throws Exception {
-        connect();
+        connector.connect();
         this.id = 1;
         ResultSet rs = this.stmt.executeQuery("SELECT MAX(ID) FROM Pages");
         this.id += rs.getInt(1);
@@ -100,6 +110,6 @@ public class PagesTableWriter extends Thread {
             this.id++;
         }
         connection.setAutoCommit(true);
-        disconnect();
+        connector.disconnect();
     }
 }
