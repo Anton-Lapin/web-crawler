@@ -1,5 +1,6 @@
 /**
- * 
+ * Класс подключается к БД; считывает из таблицы Sites данные, у которых нет ни одной ссылки по первичному ключу
+ * в таблице Pages; заносит их в список названий сайтов.
  * @author Anton Lapin
  * @version date 18 February 2018
  */
@@ -14,6 +15,10 @@ public class SitesTableReader extends Thread {
     private Statement stmt;
     private TreeMap<Integer, String> newSitesList = new TreeMap<>();
 
+    /**
+     * Точка входа в класс
+     */
+
     public void run(){
         System.out.println("SitesTableReader beginning...");
         try{
@@ -27,6 +32,11 @@ public class SitesTableReader extends Thread {
         System.out.println("SitesTableReader end");
     }
 
+    /**
+     * Метод делает запрос в таблицу Sites, считывает результат запроса в список newSitesList
+     * @throws SQLException
+     */
+
     private void searchNewSites() throws SQLException {
         ResultSet rs = this.stmt.executeQuery("SELECT * FROM Sites\n" +
                 "   LEFT JOIN Pages ON Pages.SiteID = Sites.ID\n" +
@@ -36,6 +46,11 @@ public class SitesTableReader extends Thread {
             this.newSitesList.put(rs.getInt(1), rs.getString(2));
         }
     }
+
+    /**
+     * Метод возвращает список названий новых сайтов
+     * @return newSitesList
+     */
 
     public TreeMap<Integer, String> getNewSitesList() {
         return this.newSitesList;

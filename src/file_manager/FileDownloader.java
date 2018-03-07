@@ -1,4 +1,5 @@
 /**
+ * Класс содержит метод загрузки файлов из сети Интернет
  * @author Antor Lapin
  * @version date Feb 23, 2018
  */
@@ -15,6 +16,13 @@ public class FileDownloader {
     private URL url;
     private byte[] buffer;
     private int count;
+
+    /**
+     * Метод принимает на вход строку url-адреса и строку места расположения скачиваемого файла на ПК; буферным методом
+     * скачивает файл по указанному адресу из источника в указанную директиву на ПК.
+     * @param urlStr
+     * @param file
+     */
 
     public void downloadUsingStream(String urlStr, String file) {
         this.bis = null;

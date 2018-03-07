@@ -1,4 +1,6 @@
 /**
+ * Класс содержит методы для работы с Gzip архивами, открывает, распаковывает, читает и обрабатывает содержимое,
+ * добавляет новые ссылки в список.
  * @author Anton Lapin
  * @version Feb 25, 2018
  */
@@ -33,11 +35,20 @@ public class GzipFileManager extends Thread {
     private byte[] buffer;
     private int len;
 
+    /**
+     * Точка входа в класс
+     */
+
     public void run() {
         System.out.println("GzipFileManager begining...");
         initGZFiles();
         System.out.println("GzipFileManager end");
     }
+
+    /**
+     * Метод вызывает метод, открывающий архив; получает из него содержимое; обрабатывает содержимое и добавляет
+     * новые ссылки в список newPagesList.
+     */
 
     private void initGZFiles() {
         this.container = openGZArchiveFile();
@@ -50,6 +61,12 @@ public class GzipFileManager extends Thread {
         }
         this.container.clear();
     }
+
+    /**
+     * Метод скачивает архивы согласно списку ссылок на архивы, распаковывает их в .xml файлы,
+     * открывает файлы, копирует содержимое в childGZsitemap
+     * @return childGZsitemap
+     */
 
     private TreeMap<String, Integer> openGZArchiveFile(){
         this.count = 0;
@@ -69,9 +86,20 @@ public class GzipFileManager extends Thread {
         return this.childGZsitemap;
     }
 
+    /**
+     * Метод устанавливает список GZip архивов.
+     * @param gzipArchivesList
+     */
+
     public void setGzipArchivesList(TreeMap<String, Integer> gzipArchivesList) {
         this.gzipArchivesList = gzipArchivesList;
     }
+
+    /**
+     * Метод распаковывает GZip архивы в файл буферным методом.
+     * @param gzipFile
+     * @param newFile
+     */
 
     private void decompressGzipFile(String gzipFile, String newFile) {
         try {
@@ -88,6 +116,11 @@ public class GzipFileManager extends Thread {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Метод возвращает новый список ссылок
+     * @return newPagesList
+     */
 
     public TreeMap<String, Integer> getNewPagesList() {
         return this.newPagesList;

@@ -1,5 +1,5 @@
 /**
- *
+ * Класс содержит метод загрузки из сети Интернет содержимого страницы, соответствующей заданному url - адресу
  * @author Anton Lapin
  * @version date 15 February 2018
  */
@@ -17,6 +17,13 @@ public class Downloader {
     private BufferedReader reader;
     private URL site;
     private String line;
+
+    /**
+     * Метод принимает на вход url-адрес, инициирует загрузку страницы из сети Интернет по данному адресу;
+     * кусочным методом собирает подстроки в общую строку; возвращает результат в виде этой общей строки.
+     * @param url
+     * @return result
+     */
 
     public String exec(String url) {
         try {
