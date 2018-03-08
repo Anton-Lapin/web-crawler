@@ -21,8 +21,11 @@ import parser.SitemapsParser;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Collector extends Thread {
+    private static Logger log = Logger.getLogger(Collector.class.getName());
     private TreeMap<Integer, String> uncheckedReferencesList = new TreeMap<>();
     private TreeMap<String, Integer> robotsTxtReferenceList = new TreeMap<>();
     private TreeMap<String, Integer> sitemapReferenceList = new TreeMap<>();
@@ -51,7 +54,7 @@ public class Collector extends Thread {
      */
 
     public void run() {
-        System.out.println("Collector beginning...");
+        System.out.println("Collector is beginning...");
         try {
             startPagesTableWriter();
             do {
@@ -63,7 +66,7 @@ public class Collector extends Thread {
                 clearAllLists();
             } while(!this.uncheckedReferencesList.isEmpty());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE, "Exception: ", e);
         }
         System.out.println("Collector end");
     }
@@ -78,7 +81,7 @@ public class Collector extends Thread {
         try {
             this.pagesTableWriter.join();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE, "Exception: ", e);
         }
     }
 
@@ -86,27 +89,33 @@ public class Collector extends Thread {
      * Метод запускает нить PagesTableReader; ждет, когда нить закончит работу; получает из класса
      * список непроверенных ссылок.
      * @return список непроверенных ссылок
-     * @throws InterruptedException
      */
 
-    private TreeMap<Integer, String> getUncheckedReferencesListFromDB() throws InterruptedException {
+    private TreeMap<Integer, String> getUncheckedReferencesListFromDB() {
         this.pagesTableReader = new PagesTableReader();
         this.pagesTableReader.start();
-        this.pagesTableReader.join();
+        try {
+            this.pagesTableReader.join();
+        } catch (InterruptedException e) {
+            log.log(Level.SEVERE, "Exception: ", e);
+        }
         return this.pagesTableReader.getUncheckedReferencesList();
     }
 
     /**
      * Метод запускает нить KeywordsTableReader; ждет, когда нить закончит работу; получает из класса
      * список ключевых слов.
-     * @return список ключевых слов
-     * @throws InterruptedException
+     * @return keywordsList
      */
 
-    private TreeMap<String, Integer> getKeywordsListFromDB() throws InterruptedException {
+    private TreeMap<String, Integer> getKeywordsListFromDB() {
         this.keywordsTableReader = new KeywordsTableReader();
         this.keywordsTableReader.start();
-        this.keywordsTableReader.join();
+        try {
+            this.keywordsTableReader.join();
+        } catch (InterruptedException e) {
+            log.log(Level.SEVERE, "Exception: ", e);
+        }
         return this.keywordsTableReader.getKeywordsList();
     }
 
@@ -138,10 +147,9 @@ public class Collector extends Thread {
 
     /**
      * Метод запускает все возможные нити обхода ссылок, учитывая наличие тех или иных видов ссылок.
-     * @throws InterruptedException
      */
 
-    private void startAllParsersAndFileManagers() throws  InterruptedException {
+    private void startAllParsersAndFileManagers() {
         if (!this.robotsTxtReferenceList.isEmpty()) startRobotsTxtParser();
         if (!this.sitemapReferenceList.isEmpty()) startSitemapsParser();
         if (!this.gzArchivesList.isEmpty()) startGzipFileManager();
@@ -156,56 +164,68 @@ public class Collector extends Thread {
     /**
      * Метод устанавливает список ссылок типа robots.txt в класс RobotsTxtParser; запускает нить RobotsTxtParser;
      * ждет завершения нити; получает из класса RobotsTxtParser; вносит новые ссылки в список newPagesList
-     * @throws InterruptedException
      */
 
-    private void startRobotsTxtParser() throws InterruptedException {
+    private void startRobotsTxtParser() {
         this.robotsTxtParser = new RobotsTxtParser();
         this.robotsTxtParser.setUncheckedRobotsTxtReferencesList(this.robotsTxtReferenceList);
         this.robotsTxtParser.start();
-        this.robotsTxtParser.join();
+        try {
+            this.robotsTxtParser.join();
+        } catch (InterruptedException e) {
+            log.log(Level.SEVERE, "Exception: ", e);
+        }
         this.newPagesList.putAll(this.robotsTxtParser.getNewPagesList());
     }
 
     /**
      * Метод устанавливает список ссылок типа sitemap в класс SitemapsParser; запускает нить SitemapsParser;
      * ждет завершения нити; получает список ссылок из класса SitemapsParser; вносит новые ссылки в список newPagesList
-     * @throws InterruptedException
      */
 
-    private void startSitemapsParser() throws InterruptedException {
+    private void startSitemapsParser() {
         this.sitemapsParser = new SitemapsParser();
         this.sitemapsParser.setUncheckedSitemapReferencesList(this.sitemapReferenceList);
         this.sitemapsParser.start();
-        this.sitemapsParser.join();
+        try {
+            this.sitemapsParser.join();
+        } catch (InterruptedException e) {
+            log.log(Level.SEVERE, "Exception: ", e);
+        }
         this.newPagesList.putAll(this.sitemapsParser.getNewPagesList());
     }
 
     /**
      * Метод устанавливает список ссылок типа .xml.gz в класс GzipFileManager; запускает нить GzipFileManager;
      * ждет завершения нити; получает список ссылок из класса GzipFileManager; вносит новые ссылки в список newPagesList
-     * @throws InterruptedException
      */
 
-    private void startGzipFileManager() throws InterruptedException {
+    private void startGzipFileManager() {
         this.gzipFileManager = new GzipFileManager();
         this.gzipFileManager.setGzipArchivesList(this.gzArchivesList);
         this.gzipFileManager.start();
-        this.gzipFileManager.join();
+        try {
+            this.gzipFileManager.join();
+        } catch (InterruptedException e) {
+            log.log(Level.SEVERE, "Exception: ", e);
+        }
         this.newPagesList.putAll(this.gzipFileManager.getNewPagesList());
     }
 
     /**
      * Метод устанавливает список ссылок типа .xml в класс XmlFileManager; запускает нить XmlFileManager;
      * ждет завершения нити; получает список ссылок из класса XmlFileManager; вносит новые ссылки в список newPagesList
-     * @throws InterruptedException
      */
 
-    private void startXmlFileManager() throws InterruptedException {
+    private void startXmlFileManager() {
         this.xmlFileManager = new XmlFileManager();
         this.xmlFileManager.setXmlFilesList(this.xmlFilesList);
         this.xmlFileManager.start();
-        this.xmlFileManager.join();
+        try {
+            this.xmlFileManager.join();
+        } catch (InterruptedException e) {
+            log.log(Level.SEVERE, "Exception: ", e);
+        }
         this.newPagesList.putAll(this.xmlFileManager.getNewPagesList());
     }
 
@@ -213,15 +233,18 @@ public class Collector extends Thread {
      * Метод устанавливает список ссылок типа .html и список ключевых слов в класс HtmlsParser; запускает нить
      * HtmlsParser; ждет завершения нити; получает список рейтингов личностей из класса HtmlsParser; вносит новые
      * ссылки в список personPageRankList
-     * @throws InterruptedException
      */
 
-    private void startHtmlsParser() throws InterruptedException {
+    private void startHtmlsParser() {
         this.htmlsParser = new HtmlsParser();
         this.htmlsParser.setUncheckedHtmlsReferencesList(this.htmlsReferenceList);
         this.htmlsParser.setKeywordsList(this.keywordsList);
         this.htmlsParser.start();
-        this.htmlsParser.join();
+        try {
+            this.htmlsParser.join();
+        } catch (InterruptedException e) {
+            log.log(Level.SEVERE, "Exception: ", e);
+        }
         this.personPageRankList.putAll(this.htmlsParser.getPersonPageRankList());
     }
 
@@ -235,7 +258,7 @@ public class Collector extends Thread {
         try {
             this.pagesTableWriter.insertNewPagesList(this.newPagesList);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE, "Exception: ", e);
         }
         this.newPagesList.clear();
     }
@@ -250,7 +273,7 @@ public class Collector extends Thread {
         try {
             this.personPageRankWriter.insertNewPersonPageRankList(this.personPageRankList);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE, "Exception: ", e);
         }
     }
 

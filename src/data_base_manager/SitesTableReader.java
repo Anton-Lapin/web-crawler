@@ -8,8 +8,11 @@ package data_base_manager;
 
 import java.sql.*;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SitesTableReader extends Thread {
+    private static Logger log = Logger.getLogger(SitesTableReader.class.getName());
     private DBConnector connector = new DBConnector();
     private Connection connection;
     private Statement stmt;
@@ -20,12 +23,12 @@ public class SitesTableReader extends Thread {
      */
 
     public void run(){
-        System.out.println("SitesTableReader beginning...");
+        System.out.println("SitesTableReader is beginning...");
         try{
             connector.connect();
             searchNewSites();
-        }catch (Exception e){
-            e.printStackTrace();
+        }catch (SQLException e){
+            log.log(Level.SEVERE, "Exception: ", e);
         }finally {
             connector.disconnect();
         }

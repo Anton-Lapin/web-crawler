@@ -9,9 +9,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Downloader {
-
+    private Logger log = Logger.getLogger(Downloader.class.getName());
     private String result;
     private StringBuilder stringSum = new StringBuilder();
     private BufferedReader reader;
@@ -36,12 +38,12 @@ public class Downloader {
             this.result = stringSum.toString();
             this.reader.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            log.log(Level.SEVERE, "Exception: ", ex);
         } finally {
             try {
                 this.reader.close();
             } catch (IOException ex) {
-                ex.printStackTrace();
+                log.log(Level.SEVERE, "Exception: ", ex);
             }
         }
         return this.result;

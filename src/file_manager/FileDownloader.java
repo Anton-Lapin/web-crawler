@@ -9,8 +9,11 @@ import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileDownloader {
+    private static Logger log = Logger.getLogger(FileDownloader.class.getName());
     private BufferedInputStream bis;
     private FileOutputStream fos;
     private URL url;
@@ -37,13 +40,13 @@ public class FileDownloader {
                 this.fos.write(this.buffer, 0, this.count);
             }
         } catch (IOException e){
-            e.printStackTrace();
+            log.log(Level.SEVERE, "Exception: ", e);
         } finally {
             try {
                 this.fos.close();
                 this.bis.close();
             } catch (IOException e){
-                e.printStackTrace();
+                log.log(Level.SEVERE, "Exception: ", e);
             }
         }
     }

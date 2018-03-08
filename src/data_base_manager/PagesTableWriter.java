@@ -13,8 +13,11 @@ import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PagesTableWriter extends Thread {
+    private static Logger log = Logger.getLogger(PagesTableReader.class.getName());
     private DBConnector connector = new DBConnector();
     private Connection connection;
     private Statement stmt;
@@ -32,13 +35,13 @@ public class PagesTableWriter extends Thread {
      */
 
     public void run(){
-        System.out.println("PagesTableWriter beginning...");
+        System.out.println("PagesTableWriter is beginning...");
         try{
             connector.connect();
             getNewSitesListFromSTR();
             if(!newSitesList.isEmpty()) addStandardRobotsTxtReference();
-        }catch (Exception e){
-            e.printStackTrace();
+        }catch (SQLException ex){
+            log.log(Level.SEVERE, "Exception : ", ex);
         }finally {
             connector.disconnect();
         }
@@ -55,8 +58,8 @@ public class PagesTableWriter extends Thread {
         sitesTableReader.start();
         try {
             sitesTableReader.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException ex) {
+            log.log(Level.SEVERE, "Exception: ", ex);
         }
         newSitesList = sitesTableReader.getNewSitesList();
     }
@@ -92,7 +95,7 @@ public class PagesTableWriter extends Thread {
      * @throws Exception
      */
 
-    public void insertNewPagesList(TreeMap<String, Integer> list) throws Exception {
+    public void insertNewPagesList(TreeMap<String, Integer> list) throws SQLException {
         connector.connect();
         this.id = 1;
         ResultSet rs = this.stmt.executeQuery("SELECT MAX(ID) FROM Pages");

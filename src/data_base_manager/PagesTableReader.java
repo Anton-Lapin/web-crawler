@@ -8,8 +8,11 @@ package data_base_manager;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PagesTableReader extends Thread {
+    private static Logger log = Logger.getLogger(PagesTableReader.class.getName());
     private DBConnector connector = new DBConnector();
     private Statement stmt;
     private TreeMap<Integer, String> uncheckedReferencesList;
@@ -21,14 +24,14 @@ public class PagesTableReader extends Thread {
      */
 
     public void run() {
-        System.out.println("PagesTableReader beginning...");
+        System.out.println("PagesTableReader is beginning...");
         try {
             connector.connect();
             searchUncheckedReferences();
             if(this.uncheckedReferencesList.isEmpty()) searchOldReferences();
             this.uncheckedReferencesList.clear();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "Exception: ", ex);
         } finally {
             connector.disconnect();
         }
@@ -48,12 +51,14 @@ public class PagesTableReader extends Thread {
                 "   WHERE LastScanDate = 'null';");
         while(rs.next()) {
             //System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getInt(3));
-            this.uncheckedReferencesList.put(rs.getInt(1), rs.getString(2) + " " + rs.getInt(3));
+            this.uncheckedReferencesList.put(rs.getInt(1), rs.getString(2) + " "
+                    + rs.getInt(3));
         }
 
         this.currentTime = System.currentTimeMillis();
         this.lastScanDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(this.currentTime);
-        stmt.executeUpdate("UPDATE Pages SET LastScanDate = '" + this.lastScanDate + "' WHERE LastScanDate = 'null';");
+        stmt.executeUpdate("UPDATE Pages SET LastScanDate = '" + this.lastScanDate +
+                "' WHERE LastScanDate = 'null';");
     }
 
     /**

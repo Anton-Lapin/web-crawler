@@ -1,4 +1,6 @@
 /**
+ * Класс содержит методы для работы с файлами с расширением .xml, скачивание из сети Интернет, чтение и обработка
+ * содержимого
  * @author Anton Lapin
  * @version date Feb 23, 2018
  */
@@ -11,9 +13,11 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class XmlFileManager extends Thread {
-
+    private static Logger log = Logger.getLogger(XmlFileManager.class.getName());
     private TreeMap<String, Integer> xmlFilesList = new TreeMap<>();
     private TreeMap<String, Integer> newPagesList = new TreeMap<>();
     private FileDownloader fileDownloader;
@@ -27,15 +31,29 @@ public class XmlFileManager extends Thread {
     private char[] cbuffer;
     private InputStreamReader isr;
 
+    /**
+     * Точка входа в класс
+     */
+
     public void run() {
-        System.out.println("XmlFileManager begining...");
+        System.out.println("XmlFileManager is beginning...");
         initSitemapXMlFiles();
         System.out.println("XmlFileManager end");
     }
 
+    /**
+     * Метод устанавливает список ссылок на .xml файлы
+     * @param xmlFilesList
+     */
+
     public void setXmlFilesList(TreeMap<String, Integer> xmlFilesList) {
         this.xmlFilesList = xmlFilesList;
     }
+
+    /**
+     * Метод инициирует загрузку и открытие .xml файлов согласно списка ссылок, инициирует чтение содержимого,
+     * обработку; заносит новые ссылки в список newPagesList
+     */
 
     private void initSitemapXMlFiles() {
         this.count = 1;
@@ -53,6 +71,13 @@ public class XmlFileManager extends Thread {
         }
     }
 
+    /**
+     * Метод на вход принимает директиву имеющегося файла, открывает его, считывает содержимое буферным методом
+     * в строку, инициирует обработку строки, возвращает обработанную строку
+     * @param file
+     * @return handleString
+     */
+
     public String openXMLFile(String file) {
         this.string = "";
         this.handledString = "";
@@ -68,10 +93,15 @@ public class XmlFileManager extends Thread {
             }
             this.handledString = new StringWorker().handlingString(this.string);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE, "Exception: ", e);
         }
         return this.handledString;
     }
+
+    /**
+     * Метод возвращает список новых ссылок на страницы
+     * @return newPagesList
+     */
 
     public TreeMap<String, Integer> getNewPagesList() {
         return this.newPagesList;

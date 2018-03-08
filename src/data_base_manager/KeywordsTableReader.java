@@ -7,8 +7,11 @@ package data_base_manager;
 
 import java.sql.*;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class KeywordsTableReader extends Thread {
+    private static Logger log = Logger.getLogger(KeywordsTableReader.class.getName());
     private DBConnector connector = new DBConnector();
     private Statement stmt;
     private TreeMap<String, Integer> keywordsList;
@@ -18,15 +21,14 @@ public class KeywordsTableReader extends Thread {
      */
 
     public void run(){
-        System.out.println("KeywordsTableReader beginning...");
-        try{
-            connector.connect();
+        System.out.println("KeywordsTableReader is beginning...");
+        connector.connect();
+        try {
             createKeywordsList();
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            connector.disconnect();
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "Exception : ", ex);
         }
+        connector.disconnect();
         System.out.println("KeywordsTableReader end");
     }
 

@@ -13,12 +13,14 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 public class GzipFileManager extends Thread {
 
     private final String MAIN_FILES_PATH = "d:/forSitemaps/";
-
+    private static Logger log = Logger.getLogger(GzipFileManager.class.getName());
     private TreeMap<String, Integer> gzipArchivesList = new TreeMap<>();
     private TreeMap<String, Integer> container = new TreeMap<>();
     private TreeMap<String, Integer> newPagesList = new TreeMap<>();
@@ -40,7 +42,7 @@ public class GzipFileManager extends Thread {
      */
 
     public void run() {
-        System.out.println("GzipFileManager begining...");
+        System.out.println("GzipFileManager is beginning...");
         initGZFiles();
         System.out.println("GzipFileManager end");
     }
@@ -113,7 +115,7 @@ public class GzipFileManager extends Thread {
             this.fos.close();
             this.gis.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE, "Exception: ", e);
         }
     }
 

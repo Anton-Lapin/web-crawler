@@ -24,7 +24,7 @@ public class PersonPageRankWriter {
      * @throws Exception
      */
 
-    public void insertNewPersonPageRankList(TreeMap<String, Integer> list) throws Exception {
+    public void insertNewPersonPageRankList(TreeMap<String, Integer> list) throws SQLException {
         connector.connect();
         stmt.executeUpdate("DELETE FROM PersonPageRank");
         connection.setAutoCommit(false);
