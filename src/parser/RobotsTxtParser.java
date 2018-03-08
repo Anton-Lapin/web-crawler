@@ -1,5 +1,5 @@
 /**
- *
+ * Класс содержит методы для обхода стандартных ссылок на файлы сайтов robots.txt
  * @author Anton Lapin
  * @version date 18 February 2018
  */
@@ -19,6 +19,10 @@ public class RobotsTxtParser extends Thread {
     private String url;
     private String[] splitContent;
 
+    /**
+     * Точка входа в класс
+     */
+
     public void run() {
         System.out.println("RobotsTxtParser beginning...");
 
@@ -30,9 +34,20 @@ public class RobotsTxtParser extends Thread {
         System.out.println("RobotsTxtParser end");
     }
 
+    /**
+     * метод устанавливает список непроверенных ссылок uncheckedRobotsTxtReferencesList
+     * @param list
+     */
+
     public void setUncheckedRobotsTxtReferencesList(TreeMap<String, Integer> list) {
         this.uncheckedRobotsTxtReferencesList = list;
     }
+
+    /**
+     * Метод принимает на вход список непроверенных ссылок, инициирует загрузку данных из сети Интернет согласно
+     * url адресам, имеющимся в списке
+     * @param list
+     */
 
     private void startDownloader(TreeMap<String, Integer> list) {
         this.downloader = new Downloader();
@@ -46,6 +61,13 @@ public class RobotsTxtParser extends Thread {
         }
     }
 
+    /**
+     * Метод обрабатывает содержимое, скачанное из сети Интернет, под соответствующим идентификатором записывает
+     * результат обработки (ссылки на сайтмапы) в список новых страниц newPagesList
+     * @param pageContent
+     * @param siteId
+     */
+
     private void pageContentHandle(String pageContent, Integer siteId){
         this.splitContent = pageContent.split(" ");
         for (int i = 0; i < this.splitContent.length; i++) {
@@ -54,6 +76,11 @@ public class RobotsTxtParser extends Thread {
             }
         }
     }
+
+    /**
+     * Метод возвращает список новых страниц
+     * @return newPagesList
+     */
 
     public TreeMap<String, Integer> getNewPagesList() {
         return this.newPagesList;

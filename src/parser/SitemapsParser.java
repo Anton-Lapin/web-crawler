@@ -1,5 +1,6 @@
 /**
- *
+ * Класс содержит методы обхода сайтмапов, загрузке данных по полученным ранее ссылкам, обработке данных с получением
+ * новых ссылок.
  * @author Anton Lapin
  * @version date 13 February 2018
  */
@@ -19,6 +20,10 @@ public class SitemapsParser extends Thread {
     private String url;
     private String[] splitContent;
 
+    /**
+     * Точка входа в класс
+     */
+
     public void run() {
         System.out.println("SitemapsParser beginning...");
 
@@ -30,9 +35,20 @@ public class SitemapsParser extends Thread {
         System.out.println("SitemapsParser end");
     }
 
+    /**
+     * Метод устанавливает список непроверенных ссылок сайтмапов
+     * @param list
+     */
+
     public void setUncheckedSitemapReferencesList(TreeMap<String, Integer> list) {
         this.uncheckedSitemapReferencesList = list;
     }
+
+    /**
+     * Метод получает на вход список со ссылками сайтмапов, инициирует загрузку данных из сети Интернет, согласно
+     * url адресам, инициирует метод обработки содержимого страниц
+     * @param list
+     */
 
     private void startDownloader(TreeMap<String, Integer> list) {
         this.downloader = new Downloader();
@@ -44,6 +60,13 @@ public class SitemapsParser extends Thread {
         }
     }
 
+    /**
+     * Метод обрабатывает содержимое, скачанное из сети Интернет, под соответствующим идентификатором записывает
+     * результат обработки (ссылки на сайтмапы) в список новых страниц newPagesList
+     * @param pageContent
+     * @param siteId
+     */
+
     private void pageContentHandle(String pageContent, Integer siteId){
         this.splitContent = pageContent.split(" ");
         for (int i = 0; i < this.splitContent.length; i++) {
@@ -52,6 +75,11 @@ public class SitemapsParser extends Thread {
             }
         }
     }
+
+    /**
+     * Метод возвращает список новых ссылок
+     * @return newPagesList
+     */
 
     public TreeMap<String, Integer> getNewPagesList() {
         return this.newPagesList;
