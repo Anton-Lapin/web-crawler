@@ -1,0 +1,242 @@
+/* Fonts */
+
+@font-face {
+    font-family: 'ProximaNovaReg';
+    src: url('../fonts/ProximaNova-Regular.eot');
+    src: url('../fonts/ProximaNova-Regular.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/ProximaNova-Regular.woff2') format('woff2'),
+        url('../fonts/ProximaNova-Regular.woff') format('woff'),
+        url('../fonts/ProximaNova-Regular.ttf') format('truetype'),
+        url('../fonts/ProximaNova-Regular.svg#ProximaNova-Regular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'ProximaNovaBold';
+    src: url('../fonts/ProximaNova-Bold.eot');
+    src: url('../fonts/ProximaNova-Bold.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/ProximaNova-Bold.woff2') format('woff2'),
+        url('../fonts/ProximaNova-Bold.woff') format('woff'),
+        url('../fonts/ProximaNova-Bold.ttf') format('truetype'),
+        url('../fonts/ProximaNova-Bold.svg#ProximaNova-Bold') format('svg');
+    font-weight: bold;
+    font-style: normal;
+}
+
+.reg() {
+	font-family: 'ProximaNovaReg', sans-serif;
+}
+
+.bold() {
+	font-family: 'ProximaNovaBold', sans-serif;
+}
+
+/* Colors */
+
+@btn-color: #fbb202;
+@icon-color: #46b713;
+@text: #292929;
+@light: #fff;
+
+/* Typography */
+
+html {
+	font-size: 10px;
+}
+button, input, a {
+	&:focus {
+		outline: none;
+	}
+}
+
+/* Button */
+
+.button {
+	width: 100%;
+	height: 50px;
+	background-color: @btn-color;
+	border: none;
+	border-radius: 8px;
+	.reg;
+	text-transform: uppercase;
+	font-size: 1.3rem;
+	color: @light;
+	transition: all 0.2s;
+	&:hover {
+		cursor: pointer;
+		background-color: darken(@btn-color, 7%);
+	}
+}
+
+.main {
+	padding: 3rem 0 5rem;
+	background: #fff url("../img/bg-main-screen.jpg") 50% 50% no-repeat;
+	background-size: cover;
+	.header {
+	height: 7rem;
+	}
+.phone {
+	&-block {
+		text-align: right;
+	}
+	&-link {
+	display: inline-block;
+	line-height: 7rem;
+	.reg;
+	color: @text;
+	font-weight: 900;
+	font-size: 2rem;
+	text-decoration: none;
+}
+}
+.wrap {
+	display: table;
+	height: 7rem;
+	width: 100%;
+	&-block {
+		display: table-cell;
+		vertical-align: middle;
+	}
+}
+/* Page title */
+.page-title {
+	margin-top: 10rem;
+	.bold;
+	font-size: 4rem;
+	text-transform: uppercase;
+	line-height: 6rem;
+	color: @text;
+}
+.subtitle {
+	margin-top: 5rem;
+	margin-bottom: 6rem;
+	.reg;
+	font-size: 2.4rem;
+	color: @text;
+}
+.cost-info {
+	display: block;
+	width: 225px;
+	height: 105px;
+	margin-bottom: 3rem;
+	padding: 25px 40px;
+	text-align: center;
+	background-color: #70c849;
+	.reg;
+	font-size: 1.8rem;
+	color:@light;
+	& strong {
+		font-size: 3rem;
+	}
+}
+.trigger {
+	.bold;
+	font-size: 2.2rem;
+}
+.form {
+	width: 100%;
+	height: 410px;
+	margin-top: 10rem;
+	padding: 4rem;
+	text-align: center;
+	background-color: @light;
+	& h2 {
+		font-size: 1.8rem;
+		margin-bottom: 4rem;
+		& strong {
+			font-size: 1.9rem;
+		}
+	}
+	& form {
+		text-align: center;
+		& label {
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%) translateY(-50%);
+			background-color: @light;
+			padding: 0 .5rem; 
+		}
+		& input {
+			display: block;
+			width: 100%;
+			height: 54px;
+			margin-bottom: 2rem;
+			padding: 0 1rem;
+		}
+		& button {
+			display: block;
+			width: 100%;
+			height: 6rem;
+			font-size: 1.6rem;
+		}
+		& small {
+			margin-top: 1.5rem;
+			font-size: 1.2rem;
+
+		}
+	}
+}
+}
+@media (max-width: 1199px) and (min-width: 992px) {
+	.main {
+		background-position: 100% 50%;
+	}
+	.cost-info {
+		position: relative;
+		left: 55%;
+	}
+	.trigger {
+		position: relative;
+		left: 55%;
+	}
+}
+@media (max-width: 991px) and (min-width: 768px) {
+	.main {
+		background-position: 100% 50%;
+	}
+	.page-title {
+		text-align: center;
+	}
+	.subtitle {
+		text-align: center;
+	}
+	.cost-info {
+		position: relative;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+	.trigger {
+		text-align: center;
+	}
+}
+@media (max-width: 767px) {
+	.main {
+		background-position: 90% 50%;
+	}
+		.phone {
+		&-block {
+			margin: 20px 0;
+		}
+		&-link {
+			position: relative;
+			right: 50%;
+			transform: translateX(50%);
+		}
+	}
+	.page-title {
+		text-align: center;
+	}
+	.subtitle {
+		text-align: center;
+	}
+	.cost-info {
+		position: relative;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+	.trigger {
+		text-align: center;
+	}
+}
+
